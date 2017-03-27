@@ -114,7 +114,8 @@ public class Sniffer {
                 for (int j = 6; j < 12; j++) {
                     System.out.printf("%02X ",packet.getUByte(j));
                 }
-                if(((packet.getByte(12)<<8) + packet.getByte(13)) <= 1500){
+                // x*256 == x<<8
+                if(((packet.getByte(12)*256) + packet.getByte(13)) <= 1500){
                     System.out.println("\nTipo: IEEE802.3");
                 }else{
                     System.out.println("\nTipo: Ethernet");
