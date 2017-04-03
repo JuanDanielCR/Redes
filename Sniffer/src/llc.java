@@ -134,92 +134,105 @@ public class llc {
 		 * Third we create a packet handler which will receive packets from the
 		 * libpcap loop.
 		 **********************************************************************/
-		PcapPacketHandler<String> jpacketHandler = new PcapPacketHandler<String>() {
+	PcapPacketHandler<String> jpacketHandler = new PcapPacketHandler<String>() {
+       public void nextPacket(PcapPacket packet, String user) {
+            System.out.printf("\n\nPaquete recibido el %s caplen=%-4d longitud=%-4d %s\n\n",
+                new Date(packet.getCaptureHeader().timestampInMillis()),
+                packet.getCaptureHeader().caplen(),  // Length actually captured
+                packet.getCaptureHeader().wirelen(), // Original length
+                user                                 // User supplied object
+                );
+            /******Desencapsulado********/
+            for(int i=0;i<packet.size();i++){
+            System.out.printf("%02X ",packet.getUByte(i));
 
-			public void nextPacket(PcapPacket packet, String user) {
+            if(i%16==15)
+                System.out.println("");
+            }//if
 
-				System.out.printf("\n\nPaquete recibido el %s caplen=%-4d longitud=%-4d %s\n\n",
-				    new Date(packet.getCaptureHeader().timestampInMillis()),
-				    packet.getCaptureHeader().caplen(),  // Length actually captured
-				    packet.getCaptureHeader().wirelen(), // Original length
-				    user                                 // User supplied object
-				    );
-                                
-                                
-                                /******Desencapsulado********/
-                                for(int i=0;i<packet.size();i++){
-                                System.out.printf("%02X ",packet.getUByte(i));
-                                
-                                if(i%16==15)
-                                    System.out.println("");
-                                }//if
-                                
-                                int longitud = (packet.getUByte(12)*256)+packet.getUByte(13);
-                                System.out.printf("\nLongitud: %d (%04X)",longitud,longitud );
-                                if(longitud<1500){
-                                    System.out.println("--->Trama IEEE802.3");
-                                    System.out.printf(" |-->MAC Destino: %02X:%02X:%02X:%02X:%02X:%02X",packet.getUByte(0),packet.getUByte(1),packet.getUByte(2),packet.getUByte(3),packet.getUByte(4),packet.getUByte(5));
-                                    System.out.printf("\n |-->MAC Origen: %02X:%02X:%02X:%02X:%02X:%02X",packet.getUByte(6),packet.getUByte(7),packet.getUByte(8),packet.getUByte(9),packet.getUByte(10),packet.getUByte(11));
-                                    System.out.printf("\n |-->DSAP: %02X",packet.getUByte(14));
-                                    //System.out.println(packet.getUByte(15)& 0x00000001);
-                                    int ssap = packet.getUByte(15)& 0x00000001;
-                                    String c_r = (ssap==1)?"Respuesta":(ssap==0)?"Comando":"Otro";
-                                    System.out.printf("\n |-->SSAP: %02X   %s",packet.getUByte(15), c_r);
-                                    
-                                    /* Obteniendo el formato del paquete*/
-                                    System.out.printf("\n |-->Control: %02X",packet.getUByte(16));
-                                    if((packet.getByte(16) & 0x00000011) > 1){
-                                    //unnumbere
-                                        System.out.printf("\n |-->Tipo: Unnumbered");
-                                        if((packet.getByte(16) & 0x00010000) >= 1){
-                                            System.out.printf("\n |-->PF: 1");
-                                        }else{
-                                            System.out.printf("\n |-->PF: 0");
-                                        }
-                                    }else if((packet.getByte(16) & 0x00000001) == 1){
-                                    //Supervisory
-                                        System.out.printf("\n |-->Tipo: Supervisory");
-                                        if((packet.getByte(17) & 0x00000001) == 1){
-                                            System.out.printf("\n |-->PF: 1");
-                                        }else{
-                                            System.out.printf("\n |-->PF: 0");
-                                        }
-                                    }else{
-                                    //Information &0x00000000 
-                                        System.out.printf("\n |-->Tipo: Information");
-                                        if((packet.getByte(17) & 0x00000001) == 1){
-                                            System.out.printf("\n |-->PF: 1");
-                                        }else{
-                                            System.out.printf("\n |-->PF: 0");
-                                        }
-                                    }
-                                    
-                                } else if(longitud>=1500){
-                                    System.out.println("-->Trama ETHERNET");
-                                }//else
-                                
-                                
-                                //System.out.println("\n\nEncabezado: "+ packet.toHexdump());
-      
+            int longitud = (packet.getUByte(12)*256)+packet.getUByte(13);
+            System.out.printf("\nLongitud: %d (%04X)",longitud,longitud );
+            if(longitud<1500){
+                System.out.println("--->Trama IEEE802.3");
+                System.out.printf(" |-->MAC Destino: %02X:%02X:%02X:%02X:%02X:%02X",packet.getUByte(0),packet.getUByte(1),packet.getUByte(2),packet.getUByte(3),packet.getUByte(4),packet.getUByte(5));
+                System.out.printf("\n |-->MAC Origen: %02X:%02X:%02X:%02X:%02X:%02X",packet.getUByte(6),packet.getUByte(7),packet.getUByte(8),packet.getUByte(9),packet.getUByte(10),packet.getUByte(11));
+                System.out.printf("\n |-->DSAP: %02X",packet.getUByte(14));
+                //System.out.println(packet.getUByte(15)& 0x00000001);
+                int ssap = packet.getUByte(15)& 0x00000001;
+                String c_r = (ssap==1)?"Respuesta":(ssap==0)?"Comando":"Otro";
+                System.out.printf("\n |-->SSAP: %02X   %s",packet.getUByte(15), c_r);
+                //SSAP: http://www.telecomworld101.com/8022.html
+                /* Obteniendo el formato del paquete*/
+                System.out.printf("\n |-->Control: %02X",packet.getUByte(16));
+                if((packet.getByte(16) & 0x00000011) > 1){
+                //unnumbered
+                    System.out.printf("\n |-->Tipo: Unnumbered");
+                    //pf
+                    if((packet.getByte(16) & 0x00010011) >= 1){
+                        System.out.printf("\n |-->PF: 1");
+                    }else{
+                        System.out.printf("\n |-->PF: 0");
+                    }
+                    //codigo usado
+                    
+                }else if((packet.getByte(16) & 0x00000001) == 1){
+                //Supervisory
+                    System.out.printf("\n |-->Tipo: Supervisory");
+                    //pf
+                    if((packet.getByte(17) & 0x00000001) == 1){
+                        System.out.printf("\n |-->PF: 1");
+                    }else{
+                        System.out.printf("\n |-->PF: 0");
+                    }
+                    //nr
+                    System.out.println("|-->NR: "+packet.getByte(17)/2);
+                    //codigo usado, quitamos los 2 primeros bits 01
+                    int codigo_sup = (packet.getByte(16)>>2);
+                    String codigo = "";
+                    if(codigo_sup == 0){
+                        codigo = "RR - Received Ready";
+                    }else if(codigo_sup == 1){
+                        codigo = "RNR - Received Not Ready";
+                    }else if(codigo_sup == 2){
+                        codigo = "REJ - Rejected";
+                    }else{
+                        codigo = "SRJ - Selective reject";
+                    }
+                    System.out.println(" |-->Código: "+codigo);
+                }else{
+                //Information &0x00000000 
+                    System.out.printf("\n |-->Tipo: Information");
+                    //pf
+                    if((packet.getByte(17) & 0x00000001) == 1){
+                        System.out.printf("\n |-->PF: 1");
+                    }else{
+                        System.out.printf("\n |-->PF: 0");
+                    }
+                    //ns: dividimos entre 2 para quitar el ultimo bit
+                    System.out.println("\n |-->NS: "+packet.getByte(16)/2);
+                    //nr
+                    System.out.println("|-->NR: "+packet.getByte(17)/2);
+                }
 
-			}
-		};
+            } else if(longitud>=1500){
+                System.out.println("-->Trama ETHERNET");
+            }//else
+       }
+    };
+        /***************************************************************************
+         * Fourth we enter the loop and tell it to capture 10 packets. The loop
+         * method does a mapping of pcap.datalink() DLT value to JProtocol ID, which
+         * is needed by JScanner. The scanner scans the packet buffer and decodes
+         * the headers. The mapping is done automatically, although a variation on
+         * the loop method exists that allows the programmer to sepecify exactly
+         * which protocol ID to use as the data link type for this pcap interface.
+         **************************************************************************/
+        pcap.loop(-1, jpacketHandler, " ");
 
-
-		/***************************************************************************
-		 * Fourth we enter the loop and tell it to capture 10 packets. The loop
-		 * method does a mapping of pcap.datalink() DLT value to JProtocol ID, which
-		 * is needed by JScanner. The scanner scans the packet buffer and decodes
-		 * the headers. The mapping is done automatically, although a variation on
-		 * the loop method exists that allows the programmer to sepecify exactly
-		 * which protocol ID to use as the data link type for this pcap interface.
-		 **************************************************************************/
-		pcap.loop(-1, jpacketHandler, " ");
-
-		/***************************************************************************
-		 * Last thing to do is close the pcap handle
-		 **************************************************************************/
-		pcap.close();
-                }catch(IOException e){e.printStackTrace();}
-	}
+        /***************************************************************************
+         * Last thing to do is close the pcap handle
+         **************************************************************************/
+        pcap.close();
+        }catch(IOException e){e.printStackTrace();}
+    }
 }
