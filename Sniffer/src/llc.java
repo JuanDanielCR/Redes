@@ -9,14 +9,6 @@ import org.jnetpcap.PcapIf;
 import org.jnetpcap.packet.PcapPacket;
 import org.jnetpcap.packet.PcapPacketHandler;
 import org.jnetpcap.PcapBpfProgram;
-import org.jnetpcap.protocol.lan.Ethernet;
-import org.jnetpcap.protocol.tcpip.*;
-import org.jnetpcap.protocol.network.*;
-import org.jnetpcap.nio.JBuffer;
-import org.jnetpcap.packet.Payload;
-import org.jnetpcap.protocol.network.Arp;
-import org.jnetpcap.protocol.lan.IEEE802dot2;
-import org.jnetpcap.protocol.lan.IEEE802dot3;
 
 
 public class llc {
@@ -156,11 +148,26 @@ public class llc {
                 System.out.println("--->Trama IEEE802.3");
                 System.out.printf(" |-->MAC Destino: %02X:%02X:%02X:%02X:%02X:%02X",packet.getUByte(0),packet.getUByte(1),packet.getUByte(2),packet.getUByte(3),packet.getUByte(4),packet.getUByte(5));
                 System.out.printf("\n |-->MAC Origen: %02X:%02X:%02X:%02X:%02X:%02X",packet.getUByte(6),packet.getUByte(7),packet.getUByte(8),packet.getUByte(9),packet.getUByte(10),packet.getUByte(11));
-                System.out.printf("\n |-->DSAP: %02X",packet.getUByte(14));
+                
                 //System.out.println(packet.getUByte(15)& 0x00000001);
                 int ssap = packet.getUByte(15)& 0x00000001;
-                String c_r = (ssap==1)?"Respuesta":(ssap==0)?"Comando":"Otro";
-                System.out.printf("\n |-->SSAP: %02X   %s",packet.getUByte(15), c_r);
+                String c_r = "";
+                String service = "Not NetBios";
+                if(ssap == 1){
+                    c_r = "Respuesta";
+                    if((packet.getUByte(15)-241) == 0){
+                        service = "IBM NetBios";
+                    }
+                }else if(ssap == 0){
+                    c_r = "Comando";
+                    if((packet.getUByte(15)-240) == 0){
+                        service = "IBM NetBios";
+                    }
+                }else{
+                    c_r = "Otro";
+                }
+                System.out.printf("\n |-->DSAP: %02X | %s",packet.getUByte(14),service);
+                System.out.printf("\n |-->SSAP: %02X   %s | %s",packet.getUByte(15), c_r,service);
                 //SSAP: http://www.telecomworld101.com/8022.html
                 /* Obteniendo el formato del paquete*/
                 System.out.printf("\n |-->Control: %02X",packet.getUByte(16));
