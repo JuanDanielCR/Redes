@@ -174,6 +174,36 @@ public class llc {
                         System.out.printf("\n |-->PF: 0");
                     }
                     //codigo usado
+                    int snrm = (packet.getByte(16) & 0x00000100);
+                    int snrme = (packet.getByte(16) & 0x11001100);
+                    int sabm = (packet.getByte(16) & 0x11000000);
+                    int sabme = (packet.getByte(16) & 0x11101100);
+                    int ui = (packet.getByte(16) & 0x00000000);
+                    int ur = (packet.getByte(16) & 0x00101000);
+                    
+                    int disc = (packet.getByte(16) & 0x00001000);
+                    int rst = (packet.getByte(16) & 0x11000100);
+                    int xid = (packet.getByte(16) & 0x11100100);
+                    
+                    if( snrm== 1){
+                        System.out.printf("\n |-->Code: SNRM | Respuesta Normal");
+                    }else if(snrme == 204){
+                        System.out.printf("\n |-->Code: SNRME | Respuesta Normal Extendida");
+                    }else if(sabm == 192){
+                        System.out.printf("\n |-->Code: SABM | Respuesta Asincrona");
+                    }else if(sabme == 236){
+                        System.out.printf("\n |-->Code: SABME | Respuesta Asincrona Extendida");
+                    }else if(ui == 0){
+                        System.out.printf("\n |-->Code: UI | Información sin numerar");
+                    }else if(ur == 40){
+                        System.out.printf("\n |-->Code: UR | UR");
+                    }else if(disc == 8){
+                        System.out.printf("\n |-->Code: DISC | Desconexión");
+                    }else if(rst == 196){
+                        System.out.printf("\n |-->Code: RSET | Reinicio");
+                    }else if(xid == 228){
+                        System.out.printf("\n |-->Code: XID | Intercambio de ID");
+                    }
                     
                 }else if((packet.getByte(16) & 0x00000001) == 1){
                 //Supervisory
@@ -185,7 +215,7 @@ public class llc {
                         System.out.printf("\n |-->PF: 0");
                     }
                     //nr
-                    System.out.println("|-->NR: "+packet.getByte(17)/2);
+                    System.out.println("\n |-->NR: "+packet.getByte(17)/2);
                     //codigo usado, quitamos los 2 primeros bits 01
                     int codigo_sup = (packet.getByte(16)>>2);
                     String codigo = "";
@@ -211,7 +241,7 @@ public class llc {
                     //ns: dividimos entre 2 para quitar el ultimo bit
                     System.out.println("\n |-->NS: "+packet.getByte(16)/2);
                     //nr
-                    System.out.println("|-->NR: "+packet.getByte(17)/2);
+                    System.out.println(" |-->NR: "+packet.getByte(17)/2);
                 }
 
             } else if(longitud>=1500){
