@@ -1,6 +1,10 @@
 package Protocolo;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.ByteBuffer;  
@@ -8,6 +12,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;  
+import javax.swing.JFileChooser;
+import javax.swing.filechooser.FileSystemView;
   
 import org.jnetpcap.Pcap;  
 import org.jnetpcap.PcapAddr;
@@ -18,9 +24,21 @@ import org.jnetpcap.packet.PcapPacket;
 import org.jnetpcap.packet.PcapPacketHandler;
   
 public class Envia {  
-    
-    /*Pasa un numero a hexadecimal, en este caso, la dirección MAC*/
-    private static String asString(final byte[] mac) {
+    /*Convertir long a byte[]*/
+    public static byte[] asByteArray(long number){
+        //long has 8 bytes
+        byte bytes[] = new byte[8];
+        for(int i = 7; i >= 0;i--){
+            //Using an AND in the --last-- byte, that why i decrements 
+            byte actualByte = (byte)(number & 0xFF);
+            bytes[i] = actualByte;
+            //move to the next byte, divide by 2, 8 times
+            number >>= 8; //The use of >>= saves us from using an auxiliary variable for number
+        }
+        return bytes;
+    }
+  /*Pasa un numero a hexadecimal, en este caso, la dirección MAC*/
+  private static String asString(final byte[] mac) {
     final StringBuilder buf = new StringBuilder();
     for (byte b : mac) { //Recorriendo cada byte de la dirección
       if (buf.length() != 0) {
@@ -34,7 +52,7 @@ public class Envia {
     return buf.toString();
   } //ej. entrada[106,23,41,48,117,76]   -> salida [6A:17:29:30:75:B4]
     
-  public static void main(String[] args) {  
+  public static void main(String[] args) { 
     List<PcapIf> alldevs = new ArrayList<>(); // Will be filled with NICs  
     StringBuilder errbuf = new StringBuilder(); // For any error msgs  
     String ip_interfaz = "";
@@ -88,7 +106,7 @@ public class Envia {
     }//for - get devices
 }catch(IOException io){ }//catch
     
-    //Envío y recpción de paquetes
+    //Envío y recepción de paquetes
     try{
         //Selección de un dispositivo, de la lista alldevs
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
@@ -130,39 +148,6 @@ public class Envia {
         int flags = Pcap.MODE_PROMISCUOUS; // capture all packets  
         int timeout = 10 * 1000; // 10 seconds in millis  
         Pcap pcap = Pcap.openLive(device.getName(), snaplen, flags, timeout, errbuf);  
-  
-
-        /******************************************************* 
-         * Third we create our crude packet we will transmit out
-         * FORMATO DE UNA TRAMA  ETHERNET
-         * [MAC D, MAC O, Tipo, Datos, CRC]
-         *******************************************************/  
-        
-        byte[] trama = new byte[64]; //Broadcast packet to be sent
-
-        //Agregamos los primeros campos nuestra trama, que serán las dir MAC
-        for(int k=0;k<MACo.length;k++){
-            trama[k] = (byte) 0xff; //MAC Destino, se llena con FF:FF:FF... para que llegue al Broadcast tipo Ethernet
-            trama[k+6]=MACo[k]; //MAC Origen: Es la MAC de nuestro device seleccionado
-        }
-        //[MAC D,MAC O,tipo,------] agregamos el tipo
-        trama[12]= (byte) 0x16; //tipo sin asignar
-        trama[13]= (byte) 0x01; //tipo sin asignar rfc 1340 
-        
-        //[MAC D,MAC O,tipo,msj,---] agregamos el mensaje enviar
-        String mensaje= "Me la pelas armando";
-        byte[]buf = mensaje.getBytes();
-        int tam = buf.length;
-        if(tam < 50){
-            for(int c=0;c<tam;c++)
-                trama[14+c]=buf[c];
-        }else{
-            System.out.println("El mensaje es muy largo..maximo 50 bytes");
-            System.exit(1);
-        }  
-   
-        //Agregamos la trama a un buffer de bytes;  
-        ByteBuffer b = ByteBuffer.wrap(trama);  
 
         /********F I L T R O*******
         Aplicamos un filtro a la captura de paquetes, solo capturamos el tipo
@@ -183,6 +168,9 @@ public class Envia {
         pcap.setFilter(filter);
         
         //Recibiendo los paquetes
+        //Archivo salida
+       
+        //Ciclo de recepcion de paquetes
         PcapPacketHandler<String> jpacketHandler = (PcapPacket packet, String user) -> {
         System.out.printf("Paquete recibido el %s bytes capturados = %-4d tam original = %-4d %s\n",
                 new Date(packet.getCaptureHeader().timestampInMillis()),
@@ -215,7 +203,7 @@ public class Envia {
             if(tipo==5633){ //0x1601
             //Si es un paquete de los nuestros
                 System.out.println("\n----Este es mi mensaje que mande los datos del mensaje son:-----");
-                byte[]t = packet.getByteArray(14, 50);
+                byte[]t = packet.getByteArray(14,1490);
             //Impresion seccion data
                 for(int k=0;k<t.length;k++)
                     //Bytes - Data
@@ -231,14 +219,74 @@ public class Envia {
                     if(l%16==15)
                         System.out.println("");
                 }
+            //
            }//if type = 0x1601
        };//Recepcion paquetes
         
     /******************************************************* 
-     * Fourth We send our packet off using open device 
+     * SEND our packet off using open device 
      *******************************************************/ 
-    // Ciclo para enviar mensaje
-    for(int x = 0;x < 10; x++){
+    //División del archivo en x paquetes
+        JFileChooser jFile = new JFileChooser(); 
+        int f = jFile.showOpenDialog(null);
+        long lengthFile = 0;
+        String fileName, path;
+        File file = null;
+        BufferedInputStream fileBuffer = null;
+        if(f == JFileChooser.APPROVE_OPTION){
+            file = jFile.getSelectedFile();
+            fileName  = file.getName();
+            lengthFile = file.length();
+            path = file.getAbsolutePath();
+            
+        }
+        fileBuffer = new BufferedInputStream(new FileInputStream(file));
+        byte fileBytes[] = new byte[1490];
+        long numMensajes = (long) Math.ceil(lengthFile / 1490)+1;
+        System.out.println("lenght file = "+lengthFile+" mensaje= "+numMensajes);
+        
+    // Ciclo para enviar 'x' mensajes
+    for(int x = 0;x < 100; x++){
+            /*******************************************************
+             * Create our crude packet we will transmit out
+             * FORMATO DE UNA TRAMA  ETHERNET
+             * [MAC D, MAC O, Tipo, Datos, CRC]
+             *******************************************************/
+        int read = fileBuffer.read(fileBytes, 0,1490);
+        byte[] trama = new byte[1500]; //Broadcast packet to be sent
+
+    //Agregamos los primeros campos nuestra trama, que serán las dir MAC
+        for(int k=0;k<MACo.length;k++){
+            trama[k] = (byte) 0xff; //MAC Destino, se llena con FF:FF:FF... para que llegue al Broadcast tipo Ethernet
+            trama[k+6]=MACo[k]; //MAC Origen: Es la MAC de nuestro device seleccionado
+        }
+    //[MAC D,MAC O,tipo,------] agregamos el tipo
+        trama[12]= (byte) 0x16; //tipo sin asignar
+        trama[13]= (byte) 0x01; //tipo sin asignar rfc 1340 
+        
+    //[MAC D,MAC O,tipo,msj,---] agregamos el mensaje enviar
+        int sizeBuffer = fileBytes.length;
+        if( sizeBuffer <= 1490){ //2 last bytes for checksum
+            for(int c=0; c < sizeBuffer-100; c++)
+                trama[14+c]=fileBytes[c];
+        }else{
+            System.out.println("El mensaje es muy largo..maximo 50 bytes");
+            System.exit(1);
+        }  
+    //Fin de la seccion mensaje
+        
+    //Add checksum to our packet
+        long check = Checksum.calculateChecksum(trama);
+        byte[] checksumBytes = asByteArray(check);
+        for(int j = 1; j <= checksumBytes.length; j++){
+            int posicionTrama = 1500-j; 
+            int indiceChecksum = checksumBytes.length-j;
+            if(checksumBytes[indiceChecksum] != 0){
+                trama[posicionTrama] = checksumBytes[indiceChecksum];
+            }
+        }
+     //Agregamos la trama a un buffer de bytes;  
+        ByteBuffer b = ByteBuffer.wrap(trama); 
     //Enviar mensaje
         if (pcap.sendPacket(trama) != Pcap.OK) {  
           System.err.println(pcap.getErr());  
