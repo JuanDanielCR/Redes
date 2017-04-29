@@ -4,6 +4,7 @@ import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -12,6 +13,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;  
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileSystemView;
   
@@ -166,10 +169,7 @@ public class Envia {
             System.out.println("Filter error: " + pcap.getErr());
         }
         pcap.setFilter(filter);
-        
-        //Recibiendo los paquetes
-        //Archivo salida
-       
+      FileOutputStream fos = new FileOutputStream("recibido.txt");
         //Ciclo de recepcion de paquetes
         PcapPacketHandler<String> jpacketHandler = (PcapPacket packet, String user) -> {
         System.out.printf("Paquete recibido el %s bytes capturados = %-4d tam original = %-4d %s\n",
@@ -178,7 +178,7 @@ public class Envia {
                 packet.getCaptureHeader().wirelen(), // Original length
                 user                                 // User supplied object
         );
-        
+       
         /******Desencapsulado un paquete recibido ********/
             System.out.println("MAC destino:");
         //MAC Destino
@@ -201,30 +201,46 @@ public class Envia {
             System.out.printf("Tipo= %d",tipo);
             
             int receivedBytes = packet.getUByte(14);
-            System.out.printf("Bytes received = %d",receivedBytes);
-       
+            int nameBytes = packet.getUByte(15);
+            int fileBytes = (packet.getUByte(17)*256+packet.getUByte(16)); //el tamaño cabe en dos bytes
+
             if(tipo==5633){ //0x1601
-            //Si es un paquete de los nuestros
+                //Si es un paquete de los nuestros
                 System.out.println("\nEste es mi mensaje que mande los datos del mensaje son:");
                 //bytes del archivo
-                byte[]t = packet.getByteArray(20, 1470); //indice inicial, bits a partir de ahi
-            //Impresion seccion data
+                int inicioFile = 20+nameBytes;
+                int finalFile = 1470-nameBytes;
+                if(fileBytes > 0){
+                    System.out.println("..."+finalFile);
+                    System.out.println("---"+fileBytes);
+                    finalFile = fileBytes;
+                }
+                byte[]t = packet.getByteArray(inicioFile, finalFile); //indice inicial, bits a partir de ahi
+                    
+                //Impresion seccion data
                 for(int k=0;k<t.length;k++)
-                    //Bytes - Data
-                    System.out.printf("%02X ",t[k]);
+                //Bytes - Data
+                   System.out.printf("%02X ",t[k]);
                 //String - Data
+                try { 
+                    if(receivedBytes>1){
+                       fos.write(t,0,t.length-1);
+                    }
+                } catch (IOException ex) {
+                    Logger.getLogger(Envia.class.getName()).log(Level.SEVERE, null, ex);
+                }
                 String datos = new String(t);
-                System.out.println("\nData Section: "+datos);
-                
-            //Impresion mensaje completo como bytes
+                System.out.println("\nData Section: \n"+datos);
+                //Impresion mensaje completo como bytes
                 System.out.println("Mensaje Completo: ");
                 for(int l=0;l<packet.size();l++){
                     System.out.printf("%02X ",packet.getUByte(l));
                     if(l%16==15)
-                        System.out.println("");
+                       System.out.println("");
                 }
-            //
-           }//if type = 0x1601
+
+                //fos.close(); if seccion -0x03
+            }//if type = 0x1601
        };//Recepcion paquetes
         
     /******************************************************* 
@@ -234,7 +250,7 @@ public class Envia {
         JFileChooser jFile = new JFileChooser(); 
         int f = jFile.showOpenDialog(null);
         long lengthFile = 0;
-        String fileName, path;
+        String fileName ="", path;
         File file = null;
         BufferedInputStream fileBuffer = null;
         if(f == JFileChooser.APPROVE_OPTION){
@@ -242,21 +258,20 @@ public class Envia {
             fileName  = file.getName();
             lengthFile = file.length();
             path = file.getAbsolutePath();
-            
         }
-        fileBuffer = new BufferedInputStream(new FileInputStream(file));
-       
+        System.out.println("Nombre "+fileName);
+        fileBuffer = new BufferedInputStream(new FileInputStream(file));      
         
     // Ciclo para enviar 'x' mensajes
-        int finish = 0;
+    int finish = 0;
+    int seccionEnvio = 0;
     while(finish < lengthFile){
-            /*******************************************************
-             * Create our crude packet we will transmit out
-             * FORMATO DE UNA TRAMA  ETHERNET
-             * [MAC D, MAC O, Tipo, Datos, CRC]
-             *******************************************************/
-        byte fileBytes[] = new byte[1470];
-        int readedBytes = fileBuffer.read(fileBytes);
+        /*******************************************************
+        * Create our crude packet we will transmit out
+        * FORMATO DE UNA TRAMA  ETHERNET
+        * [MAC D, MAC O, Tipo, Datos, CRC]
+        *******************************************************/
+
         byte[] trama = new byte[1500]; //Broadcast packet to be sent
 
     //Agregamos los primeros campos nuestra trama, que serán las dir MAC
@@ -267,26 +282,47 @@ public class Envia {
     //[MAC D,MAC O,tipo,------] agregamos el tipo
         trama[12]= (byte) 0x16; //tipo sin asignar
         trama[13]= (byte) 0x01; //tipo sin asignar rfc 1340
-        
-    //Nuestro prtocolo
-        trama[14]= (byte) readedBytes; //tipo sin asignar
-        trama[15]= (byte) 0x00; //tipo sin asignar rfc 1340 
-        trama[16]= (byte) 0x00; //tipo sin asignar
-        trama[17]= (byte) 0x00; //tipo sin asignar rfc 1340 
-        trama[18]= (byte) 0x00; //tipo sin asignar
-        trama[19]= (byte) 0x00; //tipo sin asignar rfc 1340 
-        trama[20]= (byte) 0x00; //tipo sin asignar
 
-    //[MAC D,MAC O,tipo,msj,---] agregamos el mensaje enviar
-        int sizeBuffer = fileBytes.length;
-        if( sizeBuffer <= 1470){ //2 last bytes for checksum
-            for(int c=0; c < sizeBuffer; c++)
-                trama[20+c]=fileBytes[c];
-        }else{
-            System.out.println("Maximo 50 bytes");
-            System.exit(1);
-        }  
-    //Fin de la seccion mensaje
+    //Nuestro protocolo
+        //Agregamos el nombre del archivo
+        byte[]buf = fileName.getBytes();
+        int nombreBytes;
+        for(nombreBytes = 0;nombreBytes<buf.length;nombreBytes++){
+            trama[20+nombreBytes]=buf[nombreBytes];
+        }
+        trama[15]= (byte) nombreBytes; // Tamaño msj
+        trama[16]= (byte) 0x00; //
+        trama[17]= (byte) 0x00; // 
+        trama[18]= (byte) 0x00; //
+        trama[19]= (byte) 0x00; // 
+        trama[20]= (byte) 0x00; //
+        
+        if(seccionEnvio == 0){
+            trama[14]= (byte) 0x01; // Seccion: 01 - Envio nombre Archivo
+            seccionEnvio = 1;
+        }else if(seccionEnvio == 1){ // 
+            byte fileBytes[] = new byte[1470-nombreBytes];
+            try {
+                int readedBytes = fileBuffer.read(fileBytes);
+                trama[14]= (byte) 0x02; // 10 - Envio contenido Archivo
+            //[MAC D,MAC O,tipo,msj,---] agregamos el mensaje enviar
+                int sizeBuffer = fileBytes.length;
+                if( sizeBuffer <= 1470){ //2 last bytes for checksum
+                    for(int c=0; c < sizeBuffer; c++)
+                        trama[(20+nombreBytes)+c]=fileBytes[c];
+                }else{
+                    System.out.println("Maximo 50 bytes");
+                    System.exit(1);
+                } 
+                System.out.println("\n ***"+readedBytes);
+                //Readed bytes from file, usamos 2 bytes por que el archivo puede leer hasta 1470 bytes y este numero no cabe en 8 bits
+                trama[16] = (byte) (readedBytes & 0xff);
+                trama[17] = (byte) ((readedBytes >> 8)&0xff);
+                finish += readedBytes;
+            }catch (IOException ex) {
+                Logger.getLogger(Envia.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
         
     //Add checksum to our packet
         long check = Checksum.calculateChecksum(trama);
@@ -298,9 +334,7 @@ public class Envia {
         }
     //Agregamos la trama a un buffer de bytes;  
         ByteBuffer b = ByteBuffer.wrap(trama); 
-    //Readed bytes from bytes
-        finish += readedBytes;
-        System.out.println("Finish: "+finish);
+        System.out.println("\n Finish: "+finish);
     //Enviar mensaje
         if (pcap.sendPacket(trama) != Pcap.OK) {  
           System.err.println(pcap.getErr());  
@@ -317,8 +351,7 @@ public class Envia {
     /******************************************************** 
      * Lastly we close 
      ********************************************************/  
-    pcap.close();  
-    
+    pcap.close();
    }catch(IOException | NumberFormatException e){
    }//catch
   }  

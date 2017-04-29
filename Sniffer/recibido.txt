@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Prática 2</title>
+    <link rel="stylesheet" type="text/css" href="https://bootswatch.com/journal/bootstrap.min.css"/>
+  </head>
+  <body>
+  <nav class="navbar navbar-inverse">
+    <div class="container-fluid">
+      <div class="navbar-header">
+        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-2">
+          <span class="sr-only">Toggle navigation</span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="#">  Juan Daniel Castillo Reyes | ESCOM</a>
+      </div>
+    </nav>
+    <div class="row">
+      <div class="col-md-2"></div>
+      <div class="col-md-8">
+        <h1>Formularios</h1>
+        <blockquote>
+          <p>Los formularios reunen entradas a través de controlescomo cajas de texto, menus, casillas de verificación, etc.</p>
+          <small>Mi profesora de <cite title="Source Title">ESCOM</cite></small>
+        </blockquote>
+        <!--ELementos-->
+        <h2>Elemento &ltform&gt</h2>
+        <p>Este elemento es el contentendor de los elementos del formulario y sus atributos son: </p>
+        <p>
+          <span class="label label-primary">method</span> Puede contener el valor get o post.<br>
+          <span class="labe label-primary">action</span> Contiene la URL del programa en el servidor que procesa los datos.<br>
+          <span class="label label-primary">id o name</span> Identifica de forma puncia el formulario.<br>
+        </p>
+        <div class="row">
+          <div class="col-md-8">
+            <div class="panel panel-info">
+              <div class="panel-heading">
+              <h3 class="panel-title">Ejemplo formulario</h3>
+              </div>
+              <div class="panel-body">
+                &ltform action="/login" method="POST" name="form-login" id="form-login"&gt ... &lt/form&gt
+              </div>
+            </div>
+          </div>
+          <div class="col-md-2"></div>
+        </div>
+        <!--ELemento input-->
+        <h2>Elemento &ltinput&gt</h2>
+        <p>Este elemento se utiliza para crear diferentes controles de entrada, para indicar el tipo de control se utiliza el siguiente atributo:</p>
+        <p>
+          <span class="label label-primary">text</span>
+          <span class="label label-primary">password</span>
+          <span class="label label-primary">hidden</span>
+          <span class="label label-primary">checkbox</span>
+          <span class="label label-primary">radio</span>
+          <span class="label label-primary">submit</span>
+          <span class="label label-primary">reset</span>
+        </p>
+        <p>Dependiendo del tipo de control que se contenga se tienen dierentes atributos para personalizado y el general
+        se tiene el atributo <span class="label label-primary">id</span> o <span class="label label-primary">name</span> para
+        identificar los diferentes elementos y el atributo <span class="label label-primary">value </span>para dar un valor por default al elemento.</p>
+        <!--ELemento textarea-->
+        <h2>Elemento &lttextarea&gt</h2>
+        <p>Si se quiere ingresar un texto que contenga un texto grande se utiliza este control, posee los atributos:</p>
+        <p>
+          <span class="label label-primary">rows</span>
+          <span class="label label-primary">cols</span>
+        </p>
+        <!--ELemento select-->
+        <h2>Elemento &ltselect&gt</h2>
+        <p>Se utiliza para crear listas seleccionables, contiene el elemento <span class="label label-primary">&ltoption&gt</span> para especificar cada uno de los elementos de la lista.</p>
+        <div class="panel panel-info">
+          <div class="panel-heading">
+          <h3 class="panel-title">Ejemplo select</h3>
+          </div>
+          <div class="panel-body">
+            &ltselect multiple="multiple"&gt
+            &ltoption&gt Opción &lt/option&gt
+            &lt/select&gt
+          </div>
+        </div>
+        <p>Con el atributo <span class="label label-primary">multiple</span> podemos indicar que se seleccionen varios elementos de la lista.</p>
+        <!--EJERCICIO-->
+       <hr>
+        <h2>Práctica</h2>
+        <blockquote>
+          <p><a href="ejercicio.html" target="_blank">Llevame a tu ejercicio</a></p>
+        </blockquote>
+      </div>
+    <div class="col-md-2"></div>
+  </div>
+  </body>
+</html>
