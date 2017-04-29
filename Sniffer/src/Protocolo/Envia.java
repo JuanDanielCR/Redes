@@ -199,11 +199,15 @@ public class Envia {
             }
             int tipo = (packet.getUByte(12)*256)+packet.getUByte(13);
             System.out.printf("Tipo= %d",tipo);
+            
+            int receivedBytes = packet.getUByte(14);
+            System.out.printf("Bytes received = %d",receivedBytes);
        
             if(tipo==5633){ //0x1601
             //Si es un paquete de los nuestros
-                System.out.println("\n----Este es mi mensaje que mande los datos del mensaje son:-----");
-                byte[]t = packet.getByteArray(14,1490);
+                System.out.println("\nEste es mi mensaje que mande los datos del mensaje son:");
+                //bytes del archivo
+                byte[]t = packet.getByteArray(20, 1470); //indice inicial, bits a partir de ahi
             //Impresion seccion data
                 for(int k=0;k<t.length;k++)
                     //Bytes - Data
@@ -241,18 +245,18 @@ public class Envia {
             
         }
         fileBuffer = new BufferedInputStream(new FileInputStream(file));
-        byte fileBytes[] = new byte[1490];
-        long numMensajes = (long) Math.ceil(lengthFile / 1490)+1;
-        System.out.println("lenght file = "+lengthFile+" mensaje= "+numMensajes);
+       
         
     // Ciclo para enviar 'x' mensajes
-    for(int x = 0;x < 100; x++){
+        int finish = 0;
+    while(finish < lengthFile){
             /*******************************************************
              * Create our crude packet we will transmit out
              * FORMATO DE UNA TRAMA  ETHERNET
              * [MAC D, MAC O, Tipo, Datos, CRC]
              *******************************************************/
-        int read = fileBuffer.read(fileBytes, 0,1490);
+        byte fileBytes[] = new byte[1470];
+        int readedBytes = fileBuffer.read(fileBytes);
         byte[] trama = new byte[1500]; //Broadcast packet to be sent
 
     //Agregamos los primeros campos nuestra trama, que serán las dir MAC
@@ -262,15 +266,24 @@ public class Envia {
         }
     //[MAC D,MAC O,tipo,------] agregamos el tipo
         trama[12]= (byte) 0x16; //tipo sin asignar
-        trama[13]= (byte) 0x01; //tipo sin asignar rfc 1340 
+        trama[13]= (byte) 0x01; //tipo sin asignar rfc 1340
         
+    //Nuestro prtocolo
+        trama[14]= (byte) readedBytes; //tipo sin asignar
+        trama[15]= (byte) 0x00; //tipo sin asignar rfc 1340 
+        trama[16]= (byte) 0x00; //tipo sin asignar
+        trama[17]= (byte) 0x00; //tipo sin asignar rfc 1340 
+        trama[18]= (byte) 0x00; //tipo sin asignar
+        trama[19]= (byte) 0x00; //tipo sin asignar rfc 1340 
+        trama[20]= (byte) 0x00; //tipo sin asignar
+
     //[MAC D,MAC O,tipo,msj,---] agregamos el mensaje enviar
         int sizeBuffer = fileBytes.length;
-        if( sizeBuffer <= 1490){ //2 last bytes for checksum
-            for(int c=0; c < sizeBuffer-100; c++)
-                trama[14+c]=fileBytes[c];
+        if( sizeBuffer <= 1470){ //2 last bytes for checksum
+            for(int c=0; c < sizeBuffer; c++)
+                trama[20+c]=fileBytes[c];
         }else{
-            System.out.println("El mensaje es muy largo..maximo 50 bytes");
+            System.out.println("Maximo 50 bytes");
             System.exit(1);
         }  
     //Fin de la seccion mensaje
@@ -281,12 +294,13 @@ public class Envia {
         for(int j = 1; j <= checksumBytes.length; j++){
             int posicionTrama = 1500-j; 
             int indiceChecksum = checksumBytes.length-j;
-            if(checksumBytes[indiceChecksum] != 0){
-                trama[posicionTrama] = checksumBytes[indiceChecksum];
-            }
+            trama[posicionTrama] = checksumBytes[indiceChecksum];
         }
-     //Agregamos la trama a un buffer de bytes;  
+    //Agregamos la trama a un buffer de bytes;  
         ByteBuffer b = ByteBuffer.wrap(trama); 
+    //Readed bytes from bytes
+        finish += readedBytes;
+        System.out.println("Finish: "+finish);
     //Enviar mensaje
         if (pcap.sendPacket(trama) != Pcap.OK) {  
           System.err.println(pcap.getErr());  
