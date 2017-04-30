@@ -13,10 +13,10 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;  
+import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JFileChooser;
-import javax.swing.filechooser.FileSystemView;
   
 import org.jnetpcap.Pcap;  
 import org.jnetpcap.PcapAddr;
@@ -169,7 +169,9 @@ public class Envia {
             System.out.println("Filter error: " + pcap.getErr());
         }
         pcap.setFilter(filter);
-      FileOutputStream fos = new FileOutputStream("recibido.txt");
+        
+        /* END FILTER    */
+        FileOutputStream fos = new FileOutputStream("recibido.txt");
         //Ciclo de recepcion de paquetes
         PcapPacketHandler<String> jpacketHandler = (PcapPacket packet, String user) -> {
         System.out.printf("Paquete recibido el %s bytes capturados = %-4d tam original = %-4d %s\n",
@@ -178,8 +180,29 @@ public class Envia {
                 packet.getCaptureHeader().wirelen(), // Original length
                 user                                 // User supplied object
         );
-       
-        /******Desencapsulado un paquete recibido ********/
+        if(user.equals("sender")){
+            System.out.println("Entre en sender");
+            /*byte[] MACo, compare whit package MAC Origin, 
+              If they are equal, its the package that was send,
+              If they are differen, its the response from another package (ack)
+              Break infinite loop if they are different
+            */
+            int isACK = 0;
+            for (int i2 = 6, i3 = 0; i2 < 12; i2++,i3++) {
+                if((byte)packet.getUByte(i2)*2 != MACo[i3]){
+                    //packet.getUByte() is an int, MACo is byte, cast to really compare
+                    isACK = 1;
+                }   
+            }//for MACs equality
+                if(isACK == 1){  //Es de otra MAC
+                System.out.println("VIENDO ACK");
+                pcap.breakloop(); //Salir del bucle
+            }else{
+                System.out.println("ES MIO");
+            }
+        //receiver
+        }else{
+            /******Desencapsulado un paquete recibido ********/
             System.out.println("MAC destino:");
         //MAC Destino
             for (int i1 = 0; i1 < 6; i1++) {
@@ -206,21 +229,19 @@ public class Envia {
 
             if(tipo==5633){ //0x1601
                 //Si es un paquete de los nuestros
-                System.out.println("\nEste es mi mensaje que mande los datos del mensaje son:");
+                System.out.println("\n----------Mensaje Recibido---------:");
                 //bytes del archivo
                 int inicioFile = 20+nameBytes;
                 int finalFile = 1470-nameBytes;
                 if(fileBytes > 0){
-                    System.out.println("..."+finalFile);
-                    System.out.println("---"+fileBytes);
                     finalFile = fileBytes;
                 }
                 byte[]t = packet.getByteArray(inicioFile, finalFile); //indice inicial, bits a partir de ahi
                     
-                //Impresion seccion data
+                /*Impresion seccion data
                 for(int k=0;k<t.length;k++)
                 //Bytes - Data
-                   System.out.printf("%02X ",t[k]);
+                   System.out.printf("%02X ",t[k]);*/
                 //String - Data
                 try { 
                     if(receivedBytes>1){
@@ -230,22 +251,45 @@ public class Envia {
                     Logger.getLogger(Envia.class.getName()).log(Level.SEVERE, null, ex);
                 }
                 String datos = new String(t);
-                System.out.println("\nData Section: \n"+datos);
+                System.out.println("\n--Seccion Archivo: -- \n"+datos);
                 //Impresion mensaje completo como bytes
-                System.out.println("Mensaje Completo: ");
+                System.out.println("\n--Mensaje Completo: --\n");
                 for(int l=0;l<packet.size();l++){
                     System.out.printf("%02X ",packet.getUByte(l));
                     if(l%16==15)
                        System.out.println("");
                 }
-
+                //Validación mismo checksum
+                long checksumReceived = Checksum.calculateChecksum(packet.getByteArray(0, packet.size()-2));
+                System.out.println("\nCheksum Received: "+checksumReceived);
                 //fos.close(); if seccion -0x03
             }//if type = 0x1601
+        }//if - sender/receiver
+     
        };//Recepcion paquetes
         
     /******************************************************* 
      * SEND our packet off using open device 
      *******************************************************/ 
+        Scanner sc = new Scanner(System.in);
+        System.out.println("¿Enviar o Recibir archivo? 1. Enviar | 2. Recibir");
+        byte isSender = sc.nextByte();
+        if(isSender == 1){
+            enviarArchivo(MACo, pcap, jpacketHandler);
+            
+        }else{
+            pcap.loop(1000, jpacketHandler, "");
+        }
+    /******************************************************** 
+     * Lastly we close 
+     ********************************************************/  
+    pcap.close();
+   }catch(IOException | NumberFormatException e){
+   }//catch
+  }  
+  
+  public static void enviarArchivo(byte[]MACo, Pcap pcap, PcapPacketHandler jpacketHandler) throws FileNotFoundException{
+              
     //División del archivo en x paquetes
         JFileChooser jFile = new JFileChooser(); 
         int f = jFile.showOpenDialog(null);
@@ -259,7 +303,7 @@ public class Envia {
             lengthFile = file.length();
             path = file.getAbsolutePath();
         }
-        System.out.println("Nombre "+fileName);
+        System.out.println("Archivo: "+fileName+" Length: "+lengthFile);
         fileBuffer = new BufferedInputStream(new FileInputStream(file));      
         
     // Ciclo para enviar 'x' mensajes
@@ -314,7 +358,6 @@ public class Envia {
                     System.out.println("Maximo 50 bytes");
                     System.exit(1);
                 } 
-                System.out.println("\n ***"+readedBytes);
                 //Readed bytes from file, usamos 2 bytes por que el archivo puede leer hasta 1470 bytes y este numero no cabe en 8 bits
                 trama[16] = (byte) (readedBytes & 0xff);
                 trama[17] = (byte) ((readedBytes >> 8)&0xff);
@@ -332,27 +375,25 @@ public class Envia {
             int indiceChecksum = checksumBytes.length-j;
             trama[posicionTrama] = checksumBytes[indiceChecksum];
         }
+        
     //Agregamos la trama a un buffer de bytes;  
         ByteBuffer b = ByteBuffer.wrap(trama); 
-        System.out.println("\n Finish: "+finish);
+       
     //Enviar mensaje
         if (pcap.sendPacket(trama) != Pcap.OK) {  
           System.err.println(pcap.getErr());  
         }
-        System.out.println("Envie un paquete******");
+        System.out.println("---Envie un paquete---");
+        System.out.println("Checksum send: "+check);
+         System.out.println("Finish count: "+finish);
         try{
     //Espera...
             Thread.sleep(500);
         }catch(InterruptedException e){}
     //Loop para rececpcion de mensajes
-        pcap.loop(1, jpacketHandler, "");
+       int i = pcap.loop(Pcap.LOOP_INFINATE, jpacketHandler, "sender");
+        System.out.println("I: "+i);
     }//for envio mensajes
     
-    /******************************************************** 
-     * Lastly we close 
-     ********************************************************/  
-    pcap.close();
-   }catch(IOException | NumberFormatException e){
-   }//catch
-  }  
+  }
 }  

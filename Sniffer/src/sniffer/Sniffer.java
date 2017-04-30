@@ -89,28 +89,26 @@ public class Sniffer {
          * Third we create a packet handler which will receive packets from the
          * libpcap loop.
          **********************************************************************/
-        PcapPacketHandler<String> jpacketHandler = new PcapPacketHandler<String>() {
-
-            public void nextPacket(PcapPacket packet, String user) {
-                
-                System.out.printf("Received packet at %s caplen=%-4d len=%-4d %s\n",
+        PcapPacketHandler<String> jpacketHandler = (PcapPacket packet, String user) -> {
+            System.out.printf("Received packet at %s caplen=%-4d len=%-4d %s\n",
                     new Date(packet.getCaptureHeader().timestampInMillis()),
                     packet.getCaptureHeader().caplen(),  // Length actually captured
                     packet.getCaptureHeader().wirelen(), // Original length
                     user                                 // User supplied object
-                    );
+            );
                 /******Desencapsulado********/
-                for(int i=0;i<packet.size();i++){
-                System.out.printf("%02X ",packet.getUByte(i));
-                if(i%16==15)
-                    System.out.println("");
+                for (int i1 = 0; i1 < packet.size(); i1++) {
+                    System.out.printf("%02X ", packet.getUByte(i1));
+                    if (i1 % 16 == 15) {
+                        System.out.println("");
+                    }
                 }
                 System.out.println("\n\nEncabezado: "+ packet.toHexdump());
-            /*---------Practica 2------------*/
+                /*---------Practica 2------------*/
                 System.out.println("----Trama Ethernet----");
                 System.out.print("MACd: ");
                 for (int j = 0; j < 6; j++) {
-                     System.out.printf("%02X ",packet.getUByte(j));
+                    System.out.printf("%02X ",packet.getUByte(j));
                 }
                 System.out.print("\nMACo: ");
                 for (int j = 6; j < 12; j++) {
@@ -123,8 +121,7 @@ public class Sniffer {
                     System.out.println("\nTipo: Ethernet");
                 }
                 System.out.println("------------Trama Ethernet---------");
-            /*---------Practica 2------------*/
-            }
+                /*---------Practica 2------------*/
         };
         /***************************************************************************
          * Fourth we enter the loop and tell it to capture 10 packets. The loop
