@@ -61,6 +61,7 @@ public class Envia {
     String ip_interfaz = "";
     final StringBuilder reenvioReceiver = new StringBuilder("correcto"); //usado en el sender, receiver quiere reenvio
     final StringBuilder reenvioSender   = new StringBuilder("correcto");
+    final StringBuilder recepcion = new StringBuilder("conexion");
    /********************************************
      First get a list of devices on this system
     *********************************************/
@@ -182,6 +183,7 @@ public class Envia {
                 packet.getCaptureHeader().wirelen(), // Original length
                 user                                 // User supplied object
         );
+            System.out.println("Estoy escuchando");
         if(user.equals("sender")){
             System.out.println("Entre en sender");
             /*byte[] MACo, compare whit package MAC Origin, 
@@ -274,21 +276,21 @@ public class Envia {
                 }
                 //ACK receiver
                 int ackSender = packet.getUByte(19);
+                
                 if(ackSender == 0){
                     reenvioSender.append("reenvia"); //Sender no envio algo bien
                 }
                 //Validación mismo checksum
                 long checksumReceived = Checksum.calculateChecksum(packet.getByteArray(0, packet.size()-2));
                 System.out.println("\nCheksum Received: "+checksumReceived);
-                try {
-                    enviarACK(reenvioSender,MACo, pcap,2,null);
-                    //fos.close(); if seccion -0x03
-                } catch (FileNotFoundException ex) {
-                    Logger.getLogger(Envia.class.getName()).log(Level.SEVERE, null, ex);
-                }
+                pcap.breakloop();
+                recepcion.append("acks");
                 if(receivedBytes > 2){ //Cerrar la conexion si el sender manda trama[14] = 3, despues de enviar todo
-                    pcap.breakloop();
+                   
+                    System.out.println("Termine");
+                    reenvioSender.append("termine");
                 }
+                 pcap.breakloop();
             }//if type = 0x1601
         }//if - sender/receiver
      
@@ -303,7 +305,10 @@ public class Envia {
         if(isSender == 1){
             enviarArchivo(reenvioReceiver,MACo, pcap, jpacketHandler);
         }else{
-            enviarACK(reenvioSender, MACo, pcap,1,jpacketHandler);
+            while(reenvioSender.toString().equals("correcto")){
+                enviarACK(recepcion,reenvioSender, MACo, pcap,jpacketHandler);
+            }
+            //eniviar mensaje de termino
         }
     /******************************************************** 
      * Lastly we close 
@@ -334,7 +339,9 @@ public class Envia {
     // Ciclo para enviar 'x' mensajes
     int finish = 0;
     int seccionEnvio = 0;
+    
     while(finish < lengthFile){
+        System.out.println("Entre a la creación de trama");
         /*******************************************************
         * Create our crude packet we will transmit out
         * FORMATO DE UNA TRAMA  ETHERNET
@@ -430,7 +437,8 @@ public class Envia {
     }//for envio mensajes
     
   } //method EnviaArchivo
-   public static void enviarACK(StringBuilder reenvioSender, byte[]MACo, Pcap pcap, int seccion, PcapPacketHandler jPacketHandler) throws FileNotFoundException{
+   public static void enviarACK(StringBuilder recepcion, StringBuilder reenvioSender, byte[]MACo, Pcap pcap, PcapPacketHandler jPacketHandler) throws FileNotFoundException{
+        System.out.println("Entre3");
         byte[] trama = new byte[1500]; //Broadcast packet to be sent
         for(int k=0;k<MACo.length;k++){
             trama[k] = (byte) 0xff;
@@ -446,12 +454,12 @@ public class Envia {
         trama[19]= (byte) 0x01; // 
         trama[20]= (byte) 0x00; //
     //Seccion 1 -Request conection
-        if(seccion == 1){
+        if(recepcion.toString().equals("conexion")){
             trama[13]= (byte) 0x01;
             trama[18]= (byte) 0x01; // 1 - request 2 - ack
     //Seccion 2 -Send ack for file
         }else{
-            if(reenvioSender.equals("reenvia")){
+            if(reenvioSender.toString().equals("reenvia")){
                 trama[19]= (byte) 0x00; // 
             }
             trama[13]= (byte) 0x02;
@@ -477,5 +485,5 @@ public class Envia {
         }catch(InterruptedException e){}
     //Loop para rececpcion de mensajes
        int i = pcap.loop(Pcap.LOOP_INFINATE, jPacketHandler, "receiver");
-   }
+    }
 }  
