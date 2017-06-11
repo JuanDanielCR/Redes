@@ -172,15 +172,15 @@ public class llc {
                 System.out.printf("\n |-->SSAP: %02X   %s | %s",packet.getUByte(15), c_r,service);
                 //SSAP: http://www.telecomworld101.com/8022.html
                 /* Obteniendo el formato del paquete*/
-                System.out.printf("\n |-->Control: %02X",packet.getUByte(16));
+                System.out.printf("\n |-->Control: %02X ("+asBinary(packet.getUByte(16))+")",packet.getUByte(16));
                 if((packet.getByte(16) & 0x00000011) > 1){
                 //unnumbered
                     System.out.printf("\n |-->Tipo: Unnumbered");
                     //pf
                     if((packet.getByte(16) & 0x00010011) >= 1){
-                        System.out.printf("\n |-->PF: 1");
+                        System.out.printf("\n |-->PF: "+Integer.toBinaryString(1));
                     }else{
-                        System.out.printf("\n |-->PF: 0");
+                        System.out.printf("\n |-->PF: "+Integer.toBinaryString(0));
                     }
                     //codigo usado
                     int snrm = (packet.getByte(16) & 0x00000100);
@@ -219,9 +219,9 @@ public class llc {
                     System.out.printf("\n |-->Tipo: Supervisory");
                     //pf
                     if((packet.getByte(17) & 0x00000001) == 1){
-                        System.out.printf("\n |-->PF: 1");
+                        System.out.printf("\n |-->PF: "+Integer.toBinaryString(1));
                     }else{
-                        System.out.printf("\n |-->PF: 0");
+                        System.out.printf("\n |-->PF: 0"+Integer.toBinaryString(0));
                     }
                     //nr
                     System.out.println("\n |-->NR: "+packet.getByte(17)/2);
@@ -243,9 +243,9 @@ public class llc {
                     System.out.printf("\n |-->Tipo: Information");
                     //pf
                     if((packet.getByte(17) & 0x00000001) == 1){
-                        System.out.printf("\n |-->PF: 1");
+                        System.out.printf("\n |-->PF: "+Integer.toBinaryString(1));
                     }else{
-                        System.out.printf("\n |-->PF: 0");
+                        System.out.printf("\n |-->PF: "+Integer.toBinaryString(0));
                     }
                     //ns: dividimos entre 2 para quitar el ultimo bit
                     System.out.println("\n |-->NS: "+packet.getByte(16)/2);
@@ -273,5 +273,19 @@ public class llc {
          **************************************************************************/
         pcap.close();
         }catch(IOException e){e.printStackTrace();}
+    }
+        
+    public static String asBinary(int num){
+        StringBuilder binary = new StringBuilder();
+        int n=num;
+        while (n>0) {
+            if((n&1)==1){
+                binary.append(1);
+            }else{
+                binary.append(0);
+            }
+            n>>=1;
+        }
+        return binary.toString();
     }
 }

@@ -347,7 +347,7 @@ public class Envia {
         
     // Ciclo para enviar 'x' mensajes
     int finish = 0;
-    int seccionEnvio = 0;
+    int seccionEnvio = 1;
     
     while(finish < lengthFile){
         System.out.println("Entre a la creación de trama");
@@ -496,6 +496,6 @@ public class Envia {
             Thread.sleep(500);
         }catch(InterruptedException e){}
     //Loop para rececpcion de mensajes
-       pcap.loop(Pcap.LOOP_INFINATE, jpacketHandler, "receiver");
+       pcap.loop(Pcap.LOOP_INFINITE, jpacketHandler, "receiver");
     }
 }  
