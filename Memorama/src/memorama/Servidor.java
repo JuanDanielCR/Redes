@@ -47,7 +47,7 @@ public class Servidor {
             if(imagenesFolder.isDirectory()){
                 for(File imagen:imagenesFolder.listFiles(imageFilter)){
                     BufferedImage imagenActual = ImageIO.read(imagen);
-                    ImageIcon i = new ImageIcon(imagenActual.getScaledInstance(80, 100,  
+                    ImageIcon i = new ImageIcon(imagenActual.getScaledInstance(50, 70,  
                             java.awt.Image.SCALE_SMOOTH));
                     imagenes.add(i);
                 }

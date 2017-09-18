@@ -19,6 +19,8 @@ public class Tablero extends javax.swing.JFrame {
     private ImageIcon myPicture = null;
     private ImageIcon card = null;
     private Map<JLabel,Card> baraja = null;
+    private Card cartaDestapada = null;
+    private int paresFormados = 0;
     
     public Tablero() throws IOException, ClassNotFoundException {
         myPicture = new ImageIcon("card.jpg");
@@ -33,10 +35,13 @@ public class Tablero extends javax.swing.JFrame {
         cliente.conectar();
         ArrayList<Card> cards = cliente.crearBaraja();
         System.out.println("card: "+cards.size());
-        for(Card c:cards){
+        /*for(Card c:cards){
             System.out.println("c: "+c.getId()+" rand: "+c.getRandom());
-        }
+        }*/
         initComponents();
+        for(int i = 0; i < cards.size(); i++){
+            asociar(i, cards.get(i));
+        }
     }
     private ImageIcon resize(ImageIcon imagenOriginal){
         Image image = imagenOriginal.getImage();
@@ -103,10 +108,17 @@ public class Tablero extends javax.swing.JFrame {
         });
         jPanel2.add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 11, -1, -1));
         jLabel1.setIcon((Icon) myPicture);
+        jLabel1.setName("Uno");
 
         jLabel2.setText("");
+        jLabel2.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jLabel2MouseClicked(evt);
+            }
+        });
         jPanel2.add(jLabel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(150, 10, -1, -1));
         jLabel2.setIcon((Icon) myPicture);
+        jLabel2.setName("DOS");
 
         jLabel3.setText("");
         jPanel2.add(jLabel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(270, 10, -1, -1));
@@ -206,14 +218,16 @@ public class Tablero extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        myPicture = new ImageIcon("rwd.png");
-        myPicture = resize(myPicture);
-        jLabel1.setIcon(myPicture);
+        jLabel1.setIcon(card);
     }//GEN-LAST:event_jButton1ActionPerformed
 
     private void jLabel1MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabel1MouseClicked
-        jLabel1.setIcon(card);
+        voltearCarta(jLabel1);
     }//GEN-LAST:event_jLabel1MouseClicked
+
+    private void jLabel2MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabel2MouseClicked
+        voltearCarta(jLabel2);
+    }//GEN-LAST:event_jLabel2MouseClicked
 
     public static void main(String args[]) {
         try {
@@ -238,7 +252,65 @@ public class Tablero extends javax.swing.JFrame {
             }
         });
     }
-
+    private void voltearCarta(JLabel cartaActual){
+        //System.out.println("..."+cartaActual.getName());
+        Card cartaAsociada =  baraja.get(cartaActual);
+        boolean bocaArriba = false;
+        //En juego
+        if(cartaAsociada.isIsShown()==false){
+            ImageIcon imageIcon = cartaAsociada.getImage();
+            cartaActual.setIcon(imageIcon);
+            //Boca abajo
+            if(bocaArriba==false){
+                //No hay otra carta arriba
+                if(cartaDestapada == null){
+                    cartaDestapada = cartaAsociada;
+                }else{
+                    //Encontro pareja
+                    if(cartaDestapada.getId() == cartaAsociada.getId()){
+                        cartaDestapada.setIsShown(true);
+                        cartaAsociada.setIsShown(true);
+                        paresFormados++;
+                    }else{ //Ambas son diferentes volteo ambas
+                        cartaActual.setIcon(card);
+                        //TODO: VOLTAER 
+                        //baraja.get(cartaDestapada);
+                        cartaDestapada = null;
+                    }
+                }
+                bocaArriba = true;
+            }else{
+                jLabel1.setIcon(card);
+                cartaDestapada = null;
+                bocaArriba = false;
+            }
+        }
+    }
+    private void asociar(int i, Card card){
+        switch(i){
+            case 0: baraja.put(jLabel1, card); break;
+            case 1: baraja.put(jLabel2, card); break;
+            case 2: baraja.put(jLabel3, card); break;
+            case 3: baraja.put(jLabel4, card); break;
+            case 4: baraja.put(jLabel5, card); break;
+            case 5: baraja.put(jLabel6, card); break;
+            case 6: baraja.put(jLabel7, card); break;
+            case 7: baraja.put(jLabel8, card); break;
+            case 8: baraja.put(jLabel9, card); break;
+            case 9: baraja.put(jLabel10, card); break;
+            case 10: baraja.put(jLabel11, card); break;
+            case 11: baraja.put(jLabel12, card); break;
+            case 12: baraja.put(jLabel13, card); break;
+            case 13: baraja.put(jLabel14, card); break;
+            case 14: baraja.put(jLabel15, card); break;
+            case 15: baraja.put(jLabel16, card); break;
+            case 16: baraja.put(jLabel17, card); break;
+            case 17: baraja.put(jLabel18, card); break;
+            case 18: baraja.put(jLabel19, card); break;
+            case 19: baraja.put(jLabel20, card); break;
+            default: baraja.put(jLabel4, card); break;
+        }
+    }
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel1;

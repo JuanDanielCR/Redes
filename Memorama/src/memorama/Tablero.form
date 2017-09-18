@@ -91,7 +91,7 @@
                 <EventHandler event="mouseClicked" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="jLabel1MouseClicked"/>
               </Events>
               <AuxValues>
-                <AuxValue name="JavaCodeGenerator_allCodePost" type="java.lang.String" value="jLabel1.setIcon((Icon) myPicture);"/>
+                <AuxValue name="JavaCodeGenerator_allCodePost" type="java.lang.String" value="jLabel1.setIcon((Icon) myPicture);&#xa;jLabel1.setName(&quot;Uno&quot;);"/>
               </AuxValues>
               <Constraints>
                 <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignAbsoluteLayout" value="org.netbeans.modules.form.compat2.layouts.DesignAbsoluteLayout$AbsoluteConstraintsDescription">
@@ -105,8 +105,11 @@
                   <Connection code="&quot;&quot;" type="code"/>
                 </Property>
               </Properties>
+              <Events>
+                <EventHandler event="mouseClicked" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="jLabel2MouseClicked"/>
+              </Events>
               <AuxValues>
-                <AuxValue name="JavaCodeGenerator_allCodePost" type="java.lang.String" value="jLabel2.setIcon((Icon) myPicture);"/>
+                <AuxValue name="JavaCodeGenerator_allCodePost" type="java.lang.String" value="jLabel2.setIcon((Icon) myPicture);&#xa;jLabel2.setName(&quot;DOS&quot;);"/>
               </AuxValues>
               <Constraints>
                 <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignAbsoluteLayout" value="org.netbeans.modules.form.compat2.layouts.DesignAbsoluteLayout$AbsoluteConstraintsDescription">
