@@ -9,6 +9,7 @@ import javax.swing.ImageIcon;
 public class Card implements Comparable{
     private ImageIcon image;
     private boolean isShown;
+    private boolean bocaArriba;
     private byte id;
     private int random;
 
@@ -17,6 +18,7 @@ public class Card implements Comparable{
         this.image = imageIcon;
         this.id = id;
         this.random = random;
+        this.bocaArriba = false;
     }
     
     public ImageIcon getImage() {
@@ -51,6 +53,14 @@ public class Card implements Comparable{
         this.random = random;
     }
 
+    public boolean isBocaArriba() {
+        return bocaArriba;
+    }
+
+    public void setBocaArriba(boolean bocaArriba) {
+        this.bocaArriba = bocaArriba;
+    }
+    
     @Override
     public int compareTo(Object o) {
         return (((Card)o).getRandom()-this.random );

@@ -10,7 +10,8 @@ public class Registro implements Comparable{
     private Date inicio;
     private Date fin;
     private long minutos;
-    
+    private String nombre;
+            
     public Registro(){
     }
     public void obtenerMinutos(){
@@ -41,6 +42,14 @@ public class Registro implements Comparable{
         this.minutos = minutos;
     }
 
+    public String getNombre() {
+        return nombre;
+    }
+
+    public void setNombre(String nombre) {
+        this.nombre = nombre;
+    }
+    
     @Override
     public int compareTo(Object o) {
         long aux = this.minutos - ((Registro)o).getMinutos();

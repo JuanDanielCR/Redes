@@ -123,6 +123,9 @@
                   <Connection code="&quot;&quot;" type="code"/>
                 </Property>
               </Properties>
+              <Events>
+                <EventHandler event="mouseClicked" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="jLabel3MouseClicked"/>
+              </Events>
               <AuxValues>
                 <AuxValue name="JavaCodeGenerator_allCodePost" type="java.lang.String" value="jLabel3.setIcon((Icon) myPicture);"/>
               </AuxValues>
@@ -138,6 +141,9 @@
                   <Connection code="&quot;&quot;" type="code"/>
                 </Property>
               </Properties>
+              <Events>
+                <EventHandler event="mouseClicked" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="jLabel4MouseClicked"/>
+              </Events>
               <AuxValues>
                 <AuxValue name="JavaCodeGenerator_allCodePost" type="java.lang.String" value="jLabel4.setIcon((Icon) myPicture);"/>
               </AuxValues>
@@ -153,6 +159,9 @@
                   <Connection code="&quot;&quot;" type="code"/>
                 </Property>
               </Properties>
+              <Events>
+                <EventHandler event="mouseClicked" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="jLabel5MouseClicked"/>
+              </Events>
               <AuxValues>
                 <AuxValue name="JavaCodeGenerator_allCodePost" type="java.lang.String" value="jLabel5.setIcon((Icon) myPicture);"/>
               </AuxValues>
@@ -168,6 +177,9 @@
                   <Connection code="&quot;&quot;" type="code"/>
                 </Property>
               </Properties>
+              <Events>
+                <EventHandler event="mouseClicked" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="jLabel6MouseClicked"/>
+              </Events>
               <AuxValues>
                 <AuxValue name="JavaCodeGenerator_allCodePost" type="java.lang.String" value="jLabel6.setIcon((Icon) myPicture);"/>
               </AuxValues>
@@ -183,6 +195,9 @@
                   <Connection code="&quot;&quot;" type="code"/>
                 </Property>
               </Properties>
+              <Events>
+                <EventHandler event="mouseClicked" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="jLabel7MouseClicked"/>
+              </Events>
               <AuxValues>
                 <AuxValue name="JavaCodeGenerator_allCodePost" type="java.lang.String" value="jLabel7.setIcon((Icon) myPicture);"/>
               </AuxValues>
@@ -198,6 +213,9 @@
                   <Connection code="&quot;&quot;" type="code"/>
                 </Property>
               </Properties>
+              <Events>
+                <EventHandler event="mouseClicked" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="jLabel10MouseClicked"/>
+              </Events>
               <AuxValues>
                 <AuxValue name="JavaCodeGenerator_allCodePost" type="java.lang.String" value="jLabel10.setIcon((Icon) myPicture);"/>
               </AuxValues>
@@ -213,6 +231,9 @@
                   <Connection code="&quot;&quot;" type="code"/>
                 </Property>
               </Properties>
+              <Events>
+                <EventHandler event="mouseClicked" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="jLabel9MouseClicked"/>
+              </Events>
               <AuxValues>
                 <AuxValue name="JavaCodeGenerator_allCodePost" type="java.lang.String" value="jLabel9.setIcon((Icon) myPicture);"/>
               </AuxValues>
@@ -228,6 +249,9 @@
                   <Connection code="&quot;&quot;" type="code"/>
                 </Property>
               </Properties>
+              <Events>
+                <EventHandler event="mouseClicked" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="jLabel8MouseClicked"/>
+              </Events>
               <AuxValues>
                 <AuxValue name="JavaCodeGenerator_allCodePost" type="java.lang.String" value="jLabel8.setIcon((Icon) myPicture);"/>
               </AuxValues>
@@ -243,6 +267,9 @@
                   <Connection code="&quot;&quot;" type="code"/>
                 </Property>
               </Properties>
+              <Events>
+                <EventHandler event="mouseClicked" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="jLabel12MouseClicked"/>
+              </Events>
               <AuxValues>
                 <AuxValue name="JavaCodeGenerator_AddingCodePost" type="java.lang.String" value="jLabel12.setIcon((Icon) myPicture);"/>
               </AuxValues>
@@ -258,6 +285,9 @@
                   <Connection code="&quot;&quot;" type="code"/>
                 </Property>
               </Properties>
+              <Events>
+                <EventHandler event="mouseClicked" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="jLabel15MouseClicked"/>
+              </Events>
               <AuxValues>
                 <AuxValue name="JavaCodeGenerator_AddingCodePost" type="java.lang.String" value="jLabel15.setIcon((Icon) myPicture);"/>
               </AuxValues>
@@ -273,6 +303,9 @@
                   <Connection code="&quot;&quot;" type="code"/>
                 </Property>
               </Properties>
+              <Events>
+                <EventHandler event="mouseClicked" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="jLabel16MouseClicked"/>
+              </Events>
               <AuxValues>
                 <AuxValue name="JavaCodeGenerator_allCodePost" type="java.lang.String" value="jLabel16.setIcon((Icon) myPicture);"/>
               </AuxValues>
@@ -288,6 +321,9 @@
                   <Connection code="&quot;&quot;" type="code"/>
                 </Property>
               </Properties>
+              <Events>
+                <EventHandler event="mouseClicked" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="jLabel20MouseClicked"/>
+              </Events>
               <AuxValues>
                 <AuxValue name="JavaCodeGenerator_allCodePost" type="java.lang.String" value="jLabel20.setIcon((Icon) myPicture);"/>
               </AuxValues>
@@ -303,6 +339,9 @@
                   <Connection code="&quot;&quot;" type="code"/>
                 </Property>
               </Properties>
+              <Events>
+                <EventHandler event="mouseClicked" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="jLabel11MouseClicked"/>
+              </Events>
               <AuxValues>
                 <AuxValue name="JavaCodeGenerator_allCodePost" type="java.lang.String" value="jLabel11.setIcon((Icon) myPicture);"/>
               </AuxValues>
@@ -318,6 +357,9 @@
                   <Connection code="&quot;&quot;" type="code"/>
                 </Property>
               </Properties>
+              <Events>
+                <EventHandler event="mouseClicked" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="jLabel14MouseClicked"/>
+              </Events>
               <AuxValues>
                 <AuxValue name="JavaCodeGenerator_allCodePost" type="java.lang.String" value="jLabel14.setIcon((Icon) myPicture);"/>
               </AuxValues>
@@ -333,6 +375,9 @@
                   <Connection code="&quot;&quot;" type="code"/>
                 </Property>
               </Properties>
+              <Events>
+                <EventHandler event="mouseClicked" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="jLabel19MouseClicked"/>
+              </Events>
               <AuxValues>
                 <AuxValue name="JavaCodeGenerator_allCodePost" type="java.lang.String" value="jLabel19.setIcon((Icon) myPicture);"/>
               </AuxValues>
@@ -348,6 +393,9 @@
                   <Connection code="&quot;&quot;" type="code"/>
                 </Property>
               </Properties>
+              <Events>
+                <EventHandler event="mouseClicked" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="jLabel18MouseClicked"/>
+              </Events>
               <AuxValues>
                 <AuxValue name="JavaCodeGenerator_AddingCodePost" type="java.lang.String" value="jLabel18.setIcon((Icon) myPicture);"/>
               </AuxValues>
@@ -363,6 +411,9 @@
                   <Connection code="&quot;&quot;" type="code"/>
                 </Property>
               </Properties>
+              <Events>
+                <EventHandler event="mouseClicked" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="jLabel13MouseClicked"/>
+              </Events>
               <AuxValues>
                 <AuxValue name="JavaCodeGenerator_allCodePost" type="java.lang.String" value="jLabel13.setIcon((Icon) myPicture);"/>
               </AuxValues>
@@ -378,6 +429,9 @@
                   <Connection code="&quot;&quot;" type="code"/>
                 </Property>
               </Properties>
+              <Events>
+                <EventHandler event="mouseClicked" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="jLabel17MouseClicked"/>
+              </Events>
               <AuxValues>
                 <AuxValue name="JavaCodeGenerator_allCodePost" type="java.lang.String" value="jLabel17.setIcon((Icon) myPicture);"/>
               </AuxValues>
