@@ -6,10 +6,14 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.Random;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 
@@ -19,16 +23,24 @@ import javax.swing.ImageIcon;
  */
 public class Cliente {
     private String ruta = "imagenesCliente";
-    private Socket cliente = null;
+    private Socket cliente;
+    private ObjectInputStream ois;
+    private ObjectOutputStream oos;
+    private Registro registro;
+            
     public Cliente(){
+        this.cliente = null;
+        this.ois = null;
+        this.oos = null;
+        this.registro = null;
     }
     
     public void conectar() throws IOException, ClassNotFoundException {
         //Conectando al servidor
-        cliente = new Socket("127.0.0.1", 7805);
+        cliente = new Socket("127.0.0.1", 7800);
         System.out.println("Obteniendo imagenes");
         //Recibiendo imagenes
-        ObjectInputStream ois = new ObjectInputStream(cliente.getInputStream());
+        ois = new ObjectInputStream(cliente.getInputStream());
         ArrayList<ImageIcon> imagenes = (ArrayList<ImageIcon>)ois.readObject();
         //Guardando imagenes
         System.out.println("Guardando imagenes");
@@ -41,9 +53,7 @@ public class Cliente {
         for(ImageIcon imagen: imagenes){
             guardarImagen(imagen,i);
             i++;
-        }
-        //Logica juego
-        
+        }     
     }
     private void guardarImagen(ImageIcon imagen, int numImagen) throws IOException{
         String rutaImagen = ruta +"/"+numImagen+".png";
@@ -75,9 +85,22 @@ public class Cliente {
             }
         }
         revolverBaraja(baraja);
+        registro = new Registro();
         return baraja;
     }
     private void revolverBaraja(ArrayList<Card>baraja){
         Collections.sort(baraja);
+    }
+    public void anunciarFin(int segundos){
+        try {
+            Date fin = new Date();
+            registro.setFin(fin);
+            registro.setMinutos(segundos);
+            registro.obtenerMinutos();
+            oos = new ObjectOutputStream(cliente.getOutputStream());
+            oos.writeObject(registro);
+        } catch (IOException ex) {
+            Logger.getLogger(Cliente.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 }

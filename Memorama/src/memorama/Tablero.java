@@ -1,6 +1,8 @@
 package memorama;
 
 import java.awt.Image;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -12,6 +14,7 @@ import java.util.logging.Logger;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
+import javax.swing.Timer;
 
 /**
  *
@@ -20,31 +23,37 @@ import javax.swing.JLabel;
 public class Tablero extends javax.swing.JFrame {
     private ImageIcon myPicture = null;
     private ImageIcon card = null;
-    private Map<JLabel,Card> baraja = null;
-    private Card cartaDestapada = null;
     private JLabel parActual = null;
-    private Set<JLabel> paresDestapados = null;
-    private int paresFormados = 0;
     private JLabel[] cartas;
-    
+    private Set<JLabel> paresDestapados = null;
+    private Map<JLabel,Card> baraja = null;
+    private int paresFormados;
+    private int pares;
+    private Cliente cliente;
+    private Timer voltearCartas;
+    private Timer tiempoPartida;
+    private int tiempo = 0;
+    private boolean inicio;
+
     public Tablero() throws IOException, ClassNotFoundException {
-        this.cartas = new JLabel[20];
+        inicio = false;
+        paresFormados = 0;
+        cartas = new JLabel[20];
         myPicture = new ImageIcon("card.jpg");
         myPicture = resize(myPicture);
-        
         card = new ImageIcon("card.jpg");
         card = resize(card);
-        
         baraja = new HashMap<>();
         paresDestapados = new HashSet<>();
-                
-        Cliente cliente = new Cliente();
+        cliente = new Cliente();
         cliente.conectar();
         ArrayList<Card> cards = cliente.crearBaraja();
-        System.out.println("card: "+cards.size());
-        /*for(Card c:cards){
-            System.out.println("c: "+c.getId()+" rand: "+c.getRandom());
-        }*/
+        //pares = cards.size()/2;
+        pares=2;
+        //System.out.println("card: "+cards.size());
+        for(Card c:cards){
+            System.out.println("ID_CARTA: "+c.getId()+" rand: "+c.getRandom());
+        }
         initComponents();
         for(int i = 0; i < cards.size(); i++){
             asociar(i, cards.get(i));
@@ -52,7 +61,7 @@ public class Tablero extends javax.swing.JFrame {
     }
     private ImageIcon resize(ImageIcon imagenOriginal){
         Image image = imagenOriginal.getImage();
-        Image imagenFinal = image.getScaledInstance(50, 70,  java.awt.Image.SCALE_SMOOTH);
+        Image imagenFinal = image.getScaledInstance(80, 80,  java.awt.Image.SCALE_SMOOTH);
         return new ImageIcon(imagenFinal);
     }
     @SuppressWarnings("unchecked")
@@ -61,7 +70,6 @@ public class Tablero extends javax.swing.JFrame {
 
         jProgressBar1 = new javax.swing.JProgressBar();
         jPanel17 = new javax.swing.JPanel();
-        jButton1 = new javax.swing.JButton();
         jScrollPane1 = new javax.swing.JScrollPane();
         jPanel2 = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
@@ -84,6 +92,10 @@ public class Tablero extends javax.swing.JFrame {
         jLabel18 = new javax.swing.JLabel();
         jLabel13 = new javax.swing.JLabel();
         jLabel17 = new javax.swing.JLabel();
+        jLabel21 = new javax.swing.JLabel();
+        jLabel22 = new javax.swing.JLabel();
+        jLabel23 = new javax.swing.JLabel();
+        jButton1 = new javax.swing.JButton();
 
         javax.swing.GroupLayout jPanel17Layout = new javax.swing.GroupLayout(jPanel17);
         jPanel17.setLayout(jPanel17Layout);
@@ -97,199 +109,234 @@ public class Tablero extends javax.swing.JFrame {
         );
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-
-        jButton1.setText("Comenzar");
-        jButton1.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton1ActionPerformed(evt);
-            }
-        });
+        setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
 
         jPanel2.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
+        jLabel1.setBackground(new java.awt.Color(0, 153, 51));
+        jLabel1.setForeground(new java.awt.Color(0, 102, 102));
         jLabel1.setText("");
+        jLabel1.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         jLabel1.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 jLabel1MouseClicked(evt);
             }
         });
-        jPanel2.add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 11, -1, -1));
+        jPanel2.add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 0, -1, -1));
         jLabel1.setIcon((Icon) myPicture);
         jLabel1.setName("Uno");
 
         jLabel2.setText("");
+        jLabel2.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         jLabel2.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 jLabel2MouseClicked(evt);
             }
         });
-        jPanel2.add(jLabel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(150, 10, -1, -1));
+        jPanel2.add(jLabel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(150, 0, -1, -1));
         jLabel2.setIcon((Icon) myPicture);
         jLabel2.setName("DOS");
 
         jLabel3.setText("");
+        jLabel3.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         jLabel3.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 jLabel3MouseClicked(evt);
             }
         });
-        jPanel2.add(jLabel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(270, 10, -1, -1));
+        jPanel2.add(jLabel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(280, 0, -1, -1));
         jLabel3.setIcon((Icon) myPicture);
 
         jLabel4.setText("");
+        jLabel4.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         jLabel4.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 jLabel4MouseClicked(evt);
             }
         });
-        jPanel2.add(jLabel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(410, 10, -1, -1));
+        jPanel2.add(jLabel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(410, 0, -1, -1));
         jLabel4.setIcon((Icon) myPicture);
 
         jLabel5.setText("");
+        jLabel5.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        jLabel5.setFocusable(false);
         jLabel5.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 jLabel5MouseClicked(evt);
             }
         });
-        jPanel2.add(jLabel5, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 100, -1, -1));
+        jPanel2.add(jLabel5, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 110, -1, -1));
         jLabel5.setIcon((Icon) myPicture);
 
         jLabel6.setText("");
+        jLabel6.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         jLabel6.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 jLabel6MouseClicked(evt);
             }
         });
-        jPanel2.add(jLabel6, new org.netbeans.lib.awtextra.AbsoluteConstraints(150, 100, -1, -1));
+        jPanel2.add(jLabel6, new org.netbeans.lib.awtextra.AbsoluteConstraints(150, 110, -1, -1));
         jLabel6.setIcon((Icon) myPicture);
 
         jLabel7.setText("");
+        jLabel7.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         jLabel7.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 jLabel7MouseClicked(evt);
             }
         });
-        jPanel2.add(jLabel7, new org.netbeans.lib.awtextra.AbsoluteConstraints(270, 100, -1, -1));
+        jPanel2.add(jLabel7, new org.netbeans.lib.awtextra.AbsoluteConstraints(280, 110, -1, -1));
         jLabel7.setIcon((Icon) myPicture);
 
         jLabel10.setText("");
+        jLabel10.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         jLabel10.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 jLabel10MouseClicked(evt);
             }
         });
-        jPanel2.add(jLabel10, new org.netbeans.lib.awtextra.AbsoluteConstraints(150, 216, -1, -1));
+        jPanel2.add(jLabel10, new org.netbeans.lib.awtextra.AbsoluteConstraints(150, 220, -1, -1));
         jLabel10.setIcon((Icon) myPicture);
 
         jLabel9.setText("");
+        jLabel9.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         jLabel9.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 jLabel9MouseClicked(evt);
             }
         });
-        jPanel2.add(jLabel9, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 216, -1, -1));
+        jPanel2.add(jLabel9, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 220, -1, -1));
         jLabel9.setIcon((Icon) myPicture);
 
         jLabel8.setText("");
+        jLabel8.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         jLabel8.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 jLabel8MouseClicked(evt);
             }
         });
-        jPanel2.add(jLabel8, new org.netbeans.lib.awtextra.AbsoluteConstraints(410, 100, -1, -1));
+        jPanel2.add(jLabel8, new org.netbeans.lib.awtextra.AbsoluteConstraints(410, 110, -1, -1));
         jLabel8.setIcon((Icon) myPicture);
 
         jLabel12.setText("");
+        jLabel12.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         jLabel12.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 jLabel12MouseClicked(evt);
             }
         });
-        jPanel2.add(jLabel12, new org.netbeans.lib.awtextra.AbsoluteConstraints(410, 216, -1, -1));
+        jPanel2.add(jLabel12, new org.netbeans.lib.awtextra.AbsoluteConstraints(410, 220, -1, -1));
         jLabel12.setIcon((Icon) myPicture);
 
         jLabel15.setText("");
+        jLabel15.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         jLabel15.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 jLabel15MouseClicked(evt);
             }
         });
-        jPanel2.add(jLabel15, new org.netbeans.lib.awtextra.AbsoluteConstraints(270, 320, -1, -1));
+        jPanel2.add(jLabel15, new org.netbeans.lib.awtextra.AbsoluteConstraints(280, 330, -1, -1));
         jLabel15.setIcon((Icon) myPicture);
 
         jLabel16.setText("");
+        jLabel16.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         jLabel16.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 jLabel16MouseClicked(evt);
             }
         });
-        jPanel2.add(jLabel16, new org.netbeans.lib.awtextra.AbsoluteConstraints(410, 320, -1, -1));
+        jPanel2.add(jLabel16, new org.netbeans.lib.awtextra.AbsoluteConstraints(410, 330, -1, -1));
         jLabel16.setIcon((Icon) myPicture);
 
         jLabel20.setText("");
+        jLabel20.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         jLabel20.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 jLabel20MouseClicked(evt);
             }
         });
-        jPanel2.add(jLabel20, new org.netbeans.lib.awtextra.AbsoluteConstraints(410, 410, -1, -1));
+        jPanel2.add(jLabel20, new org.netbeans.lib.awtextra.AbsoluteConstraints(410, 440, -1, -1));
         jLabel20.setIcon((Icon) myPicture);
 
         jLabel11.setText("");
+        jLabel11.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         jLabel11.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 jLabel11MouseClicked(evt);
             }
         });
-        jPanel2.add(jLabel11, new org.netbeans.lib.awtextra.AbsoluteConstraints(270, 216, -1, -1));
+        jPanel2.add(jLabel11, new org.netbeans.lib.awtextra.AbsoluteConstraints(280, 220, -1, -1));
         jLabel11.setIcon((Icon) myPicture);
 
         jLabel14.setText("");
+        jLabel14.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         jLabel14.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 jLabel14MouseClicked(evt);
             }
         });
-        jPanel2.add(jLabel14, new org.netbeans.lib.awtextra.AbsoluteConstraints(150, 320, -1, -1));
+        jPanel2.add(jLabel14, new org.netbeans.lib.awtextra.AbsoluteConstraints(150, 330, -1, -1));
         jLabel14.setIcon((Icon) myPicture);
 
         jLabel19.setText("");
+        jLabel19.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         jLabel19.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 jLabel19MouseClicked(evt);
             }
         });
-        jPanel2.add(jLabel19, new org.netbeans.lib.awtextra.AbsoluteConstraints(270, 410, -1, -1));
+        jPanel2.add(jLabel19, new org.netbeans.lib.awtextra.AbsoluteConstraints(280, 440, -1, -1));
         jLabel19.setIcon((Icon) myPicture);
 
         jLabel18.setText("");
+        jLabel18.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         jLabel18.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 jLabel18MouseClicked(evt);
             }
         });
-        jPanel2.add(jLabel18, new org.netbeans.lib.awtextra.AbsoluteConstraints(150, 410, -1, -1));
+        jPanel2.add(jLabel18, new org.netbeans.lib.awtextra.AbsoluteConstraints(150, 440, -1, -1));
         jLabel18.setIcon((Icon) myPicture);
 
         jLabel13.setText("");
+        jLabel13.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         jLabel13.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 jLabel13MouseClicked(evt);
             }
         });
-        jPanel2.add(jLabel13, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 320, -1, -1));
+        jPanel2.add(jLabel13, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 330, -1, -1));
         jLabel13.setIcon((Icon) myPicture);
 
         jLabel17.setText("");
+        jLabel17.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         jLabel17.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 jLabel17MouseClicked(evt);
             }
         });
-        jPanel2.add(jLabel17, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 410, -1, -1));
+        jPanel2.add(jLabel17, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 440, -1, -1));
         jLabel17.setIcon((Icon) myPicture);
 
         jScrollPane1.setViewportView(jPanel2);
+
+        jLabel21.setFont(new java.awt.Font("SimSun", 0, 11)); // NOI18N
+        jLabel21.setText("0 seg");
+
+        jLabel22.setForeground(new java.awt.Color(0, 153, 153));
+        jLabel22.setText("Estatus: Listo para jugar");
+
+        jLabel23.setBackground(new java.awt.Color(0, 102, 102));
+        jLabel23.setFont(new java.awt.Font("Eurostile Bold", 1, 11)); // NOI18N
+        jLabel23.setForeground(new java.awt.Color(0, 153, 153));
+        jLabel23.setText("Tiempo:");
+
+        jButton1.setText("Iniciar");
+        jButton1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton1ActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -297,26 +344,31 @@ public class Tablero extends javax.swing.JFrame {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 548, Short.MAX_VALUE)
             .addGroup(layout.createSequentialGroup()
-                .addGap(223, 223, 223)
+                .addGap(16, 16, 16)
+                .addComponent(jLabel23)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jLabel21)
+                .addGap(117, 117, 117)
                 .addComponent(jButton1)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(jLabel22)
+                .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGap(31, 31, 31)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 457, Short.MAX_VALUE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jButton1)
-                .addContainerGap())
+                .addGap(2, 2, 2)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel21)
+                    .addComponent(jLabel22)
+                    .addComponent(jLabel23)
+                    .addComponent(jButton1))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 492, Short.MAX_VALUE))
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
-
-    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        voltear();
-    }//GEN-LAST:event_jButton1ActionPerformed
 
     private void jLabel1MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabel1MouseClicked
         voltearCarta(jLabel1);
@@ -397,6 +449,18 @@ public class Tablero extends javax.swing.JFrame {
     private void jLabel20MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabel20MouseClicked
         voltearCarta(jLabel20);
     }//GEN-LAST:event_jLabel20MouseClicked
+
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+        ActionListener partidaPerformer = (ActionEvent e) -> {
+            jLabel21.setText(Integer.toString(tiempo)+" seg");
+            tiempo++;
+        };
+        inicio = true;
+        jLabel22.setText("Jugando");
+        tiempoPartida = new Timer(1000, partidaPerformer);
+        jButton1.setVisible(false);
+        tiempoPartida.start();
+    }//GEN-LAST:event_jButton1ActionPerformed
     
     public static void main(String args[]) {
         try {
@@ -422,11 +486,21 @@ public class Tablero extends javax.swing.JFrame {
         });
     }
     private void voltearCarta(JLabel cartaActual){
+        ActionListener tableroPerformer = (ActionEvent e) -> {
+            int i = 0;
+            for(JLabel carta: cartas){
+                if(!paresDestapados.contains(cartas[i])){
+                    baraja.get(cartas[i]).setBocaArriba(false);
+                    cartas[i].setIcon(card);
+                }
+                i++;
+            }
+        };
         //System.out.println(cartaActual);
         Card cartaAsociada =  baraja.get(cartaActual);
         boolean bocaArriba = cartaAsociada.isBocaArriba();
         //En juego
-        if(cartaAsociada.isIsShown()==false){
+        if(cartaAsociada.isIsShown()==false && inicio==true){
             //System.out.println("carta: "+cartaActual.getName()+"boca arriba: "+bocaArriba);
             //Boca abajo
             if(bocaArriba==false){
@@ -434,34 +508,33 @@ public class Tablero extends javax.swing.JFrame {
                 cartaActual.setIcon(imageIcon);
                 cartaAsociada.setBocaArriba(true);
                 if(parActual != null){
-                    System.out.println("par: "+baraja.get(parActual).getId()+" actual:"+baraja.get(cartaActual).getId());
+                    //System.out.println("parActual != null");
+                    //System.out.println("par: "+baraja.get(parActual).getId()+" actual:"+baraja.get(cartaActual).getId());
                     if(baraja.get(parActual).getId() == baraja.get(cartaActual).getId()){
                         System.out.println("iguales");
                         paresDestapados.add(parActual);
                         paresDestapados.add(cartaActual);
                         paresFormados++;
-                        if(paresFormados==10){
-                            System.out.println("Ganaste");
+                        if(paresFormados==pares){
+                            jLabel22.setText("Ganaste");
+                            cliente.anunciarFin(tiempo);
+                            System.out.println("Gano");
+                            tiempoPartida.stop();
                         }
                     }else{
                         System.out.println("diferente");
                     }
-                    parActual = null;
+                    parActual = null; 
+                    voltearCartas.start();
                 }else{
+                    //System.out.println("Nuevo timer");
                     parActual = cartaActual;
-                    System.out.println(parActual);
+                    voltearCartas = new Timer(500, tableroPerformer);
+                    voltearCartas.setRepeats(false);
                 }
             }
         }else{
             System.out.println("Carta inhabilitada");
-        }
-    }
-    private void voltear(){
-        for(int i=0; i < cartas.length;i++){
-            if(!paresDestapados.contains(cartas[i])){
-                baraja.get(cartas[i]).setBocaArriba(false);
-                cartas[i].setIcon(card);
-            }
         }
     }
     private void asociar(int i, Card card){
@@ -505,6 +578,9 @@ public class Tablero extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel19;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel20;
+    private javax.swing.JLabel jLabel21;
+    private javax.swing.JLabel jLabel22;
+    private javax.swing.JLabel jLabel23;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;

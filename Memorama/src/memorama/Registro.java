@@ -1,23 +1,29 @@
 package memorama;
 
+import java.io.Serializable;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 /**
  *
  * @author JuanDanielCR
  */
-public class Registro implements Comparable{
+public class Registro implements Comparable, Serializable{
     private Date inicio;
     private Date fin;
     private long minutos;
     private String nombre;
             
     public Registro(){
+        inicio = new Date();
     }
-    public void obtenerMinutos(){
-        long diff = inicio.getTime() - fin.getTime();
-        minutos = diff / (60 * 1000) % 60;
+    public long obtenerMinutos(){
+        long diff = fin.getTime() - inicio.getTime();
+        minutos = diff / 1000 % 60;
+        return minutos;
     }
+    
     public Date getInicio() {
         return inicio;
     }
@@ -59,4 +65,11 @@ public class Registro implements Comparable{
             return 1;
         }
     }
+
+    @Override
+    public String toString() {
+        DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+        return "Inicio: "+dateFormat.format(inicio)+" fin: "+dateFormat.format(fin)+" tiempo: "+minutos+" seg\n";
+    }
+    
 }
